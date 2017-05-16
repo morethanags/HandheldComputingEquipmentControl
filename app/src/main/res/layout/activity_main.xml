@@ -60,6 +60,6 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/door_id"
-            android:textSize="110sp" />
+            android:textSize="65sp" />
     </LinearLayout>
 </LinearLayout>

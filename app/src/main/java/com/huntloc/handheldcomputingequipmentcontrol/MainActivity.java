@@ -1,5 +1,6 @@
 package com.huntloc.handheldcomputingequipmentcontrol;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -11,13 +12,11 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Parcelable;
-import android.support.v7.app.ActionBar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -30,7 +29,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.UUID;
@@ -41,10 +39,16 @@ public class MainActivity extends AppCompatActivity {
     private EditText mCredentialId;
     public static final String PERSONNEL_MESSAGE = "com.huntloc.handheldcomputingequipmentcontrol.PERSONNEL";
     private Button buttonCheck;
+    final int REQUEST_WRITE_EXTERNAL_STORAGE = 10;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_WRITE_EXTERNAL_STORAGE);
+
 
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (mNfcAdapter == null) {
@@ -90,10 +94,13 @@ public class MainActivity extends AppCompatActivity {
                     sendRequest();
                     hideKeyboard();
                 }
+
             }
         });
         handleIntent(getIntent());
     }
+
+
     private void setCredentialId(String id) {
         mCredentialId.setText(id);
         if (!id.isEmpty()) {
@@ -218,10 +225,9 @@ public class MainActivity extends AppCompatActivity {
         back_pressed = System.currentTimeMillis();
     }
     protected void displayEquipment(String result) {
-        Intent intent = new Intent(this,
-                EquipmentActivity.class);
+        Intent intent = new Intent(this, EquipmentActivity.class);
         intent.putExtra(PERSONNEL_MESSAGE, result);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
     }
     private void hideKeyboard() {

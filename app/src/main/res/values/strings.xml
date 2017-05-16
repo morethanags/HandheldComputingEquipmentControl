@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">Computing Equipment Control</string>
-    <string name="credential_id">Owner Badge Id:</string>
+    <string name="credential_id">Badge Id:</string>
     <string name="credential_hint">Tap a badge or enter Id</string>
     <string name="button_Check_text">Check</string>
 
     <string name="door_id">Computing Equipment Control</string>
+    <string name="title_activity_main2">Main2Activity</string>
 </resources>

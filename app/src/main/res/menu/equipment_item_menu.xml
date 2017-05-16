@@ -1,0 +1,25 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".EquipmentActivity">
+    <item
+        android:id="@+id/action_entrance"
+        android:title="Entrance"
+        android:icon="@drawable/ic_action_entrance"
+     />
+    <item
+        android:id="@+id/action_exit"
+        android:title="Exit"
+        android:icon="@drawable/ic_action_exit"
+        />
+    <item
+        android:id="@+id/action_edit"
+        android:title="Edit"
+        android:icon="@drawable/ic_action_edit"
+        />
+    <item
+        android:id="@+id/action_delete"
+        android:title="Delete"
+        android:icon="@drawable/ic_action_delete"
+     />
+</menu>
