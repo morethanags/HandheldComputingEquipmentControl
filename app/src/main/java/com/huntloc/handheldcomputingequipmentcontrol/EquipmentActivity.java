@@ -129,9 +129,16 @@ public class EquipmentActivity extends AppCompatActivity {
                 + log;
         new LogOperationTask().execute(serverURL);
     }
+    public void showLogPopupWindow(JSONObject equipment) {
+       FragmentManager manager = getFragmentManager();
+       LogEquipmentDialogFragment equipmentDialog = new LogEquipmentDialogFragment();
+       equipmentDialog.setEquipment(equipment);
+       equipmentDialog.setActivity(this);
+       equipmentDialog.show(manager, "equipmentDialog");
+    }
     public void showPopupWindow(JSONObject equipment) {
         FragmentManager manager = getFragmentManager();
-        EquipmentDialogFragment equipmentDialog = new EquipmentDialogFragment();
+        EditEquipmentDialogFragment equipmentDialog = new EditEquipmentDialogFragment();
         equipmentDialog.setEquipment(equipment);
         equipmentDialog.setActivity(this);
         equipmentDialog.show(manager, "equipmentDialog");
@@ -199,11 +206,9 @@ public class EquipmentActivity extends AppCompatActivity {
             }
         }
     }
-    public static class EquipmentDialogFragment extends DialogFragment implements View.OnClickListener {
-        Button saveButton, cancelButton, pickButton;
-        Spinner spinner;
+    public static class LogEquipmentDialogFragment extends DialogFragment implements View.OnClickListener {
+        Button entranceButton, exitButton, cancelButton;
         JSONObject equipment;
-        EditText brand, serial, observations;
         ImageView photo;
         EquipmentActivity activity;
         public void setEquipment(JSONObject equipment) {
@@ -212,16 +217,57 @@ public class EquipmentActivity extends AppCompatActivity {
         public void setActivity(EquipmentActivity activity) {
             this.activity = activity;
         }
-        public EquipmentDialogFragment() {
-        }
-
         @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
         }
-
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
+            setCancelable(true);
+            getDialog().setTitle("Computing Equipment");
+            View view = inflater.inflate(R.layout.equipment_popup_log_window, null, false);
+            photo = (ImageView) view.findViewById(R.id.imageView_photo_log);
+            if(this.equipment!=null && !this.equipment.isNull("GUID")){
+                if (!this.equipment.isNull("Photo") && !this.equipment.optString("Photo").equals("null")) {
+                    byte[] byteArray;
+                    Bitmap bitmap;
+                    byteArray = Base64
+                            .decode(this.equipment.optString("Photo"), 0);
+                    bitmap = BitmapFactory.decodeByteArray(byteArray, 0,
+                            byteArray.length);
+                    photo.setImageBitmap(bitmap);
+                } else {
+                    photo.setImageResource(R.mipmap.ic_photo_default);
+                }
+            }
+            return  view;
+        }
+        public void onClick(View view) {
+
+        }
+    }
+    public static class EditEquipmentDialogFragment extends DialogFragment implements View.OnClickListener {
+        Button saveButton, cancelButton, pickButton;
+        Spinner spinner;
+        JSONObject equipment;
+        EditText brand, serial, observations;
+        ImageView photo;
+
+        EquipmentActivity activity;
+        public void setEquipment(JSONObject equipment) {
+            this.equipment = equipment;
+        }
+        public void setActivity(EquipmentActivity activity) {
+            this.activity = activity;
+        }
+        public EditEquipmentDialogFragment() {
+        }
+        @Override
+        public void onAttach(Activity activity) {
+            super.onAttach(activity);
+        }
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                Bundle savedInstanceState) {
             setCancelable(false);
             getDialog().setTitle("Computing Equipment");
             View view = inflater.inflate(R.layout.equipment_popup_window, null, false);
@@ -433,7 +479,7 @@ public class EquipmentActivity extends AppCompatActivity {
                     if (result != null && !result.equals("")) {
                         JSONArray jsonResponse = new JSONArray(result);
                         if (jsonResponse.length() > 0) {
-                            EquipmentDialogFragment.this.showTypes(jsonResponse);
+                            EditEquipmentDialogFragment.this.showTypes(jsonResponse);
                             return;
                         }
                     }
@@ -483,7 +529,7 @@ public class EquipmentActivity extends AppCompatActivity {
                                 activity, "Equipment Saved", Toast.LENGTH_LONG)
                                 .show();
                         activity.requestEquipment();
-                        EquipmentDialogFragment.this.dismiss();
+                        EditEquipmentDialogFragment.this.dismiss();
                     }
                 } catch (Exception ex) {
 

@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class CustomAdapter extends BaseAdapter {
@@ -136,7 +137,18 @@ public class CustomAdapter extends BaseAdapter {
                     //popup.show();
                 }
             });
+            rowView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    try{
+                        JSONObject equipment = jsonArray.getJSONObject(position);
+                        ((EquipmentActivity)context).showLogPopupWindow(equipment);
+                    }
+                    catch(JSONException je){
 
+                    }
+                }
+            });
         } catch (Exception e) {
         }
 
