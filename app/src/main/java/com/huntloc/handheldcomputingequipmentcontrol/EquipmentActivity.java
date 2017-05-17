@@ -207,7 +207,7 @@ public class EquipmentActivity extends AppCompatActivity {
         }
     }
     public static class LogEquipmentDialogFragment extends DialogFragment implements View.OnClickListener {
-        Button entranceButton, exitButton, cancelButton;
+        Button entranceButton, exitButton;
         JSONObject equipment;
         ImageView photo;
         EquipmentActivity activity;
@@ -227,6 +227,10 @@ public class EquipmentActivity extends AppCompatActivity {
             getDialog().setTitle("Computing Equipment");
             View view = inflater.inflate(R.layout.equipment_popup_log_window, null, false);
             photo = (ImageView) view.findViewById(R.id.imageView_photo_log);
+            entranceButton = (Button) view.findViewById(R.id.ib_entrance);
+            exitButton = (Button) view.findViewById(R.id.ib_exit);
+            entranceButton.setOnClickListener(this);
+            exitButton.setOnClickListener(this);
             if(this.equipment!=null && !this.equipment.isNull("GUID")){
                 if (!this.equipment.isNull("Photo") && !this.equipment.optString("Photo").equals("null")) {
                     byte[] byteArray;
@@ -243,7 +247,13 @@ public class EquipmentActivity extends AppCompatActivity {
             return  view;
         }
         public void onClick(View view) {
-
+            int i = view.getId();
+            if (i == R.id.ib_entrance) {
+                activity.logEquipment(equipment, 1);
+            } else if (i == R.id.ib_exit) {
+                activity.logEquipment(equipment, 0);
+            }
+            dismiss();
         }
     }
     public static class EditEquipmentDialogFragment extends DialogFragment implements View.OnClickListener {
@@ -357,9 +367,7 @@ public class EquipmentActivity extends AppCompatActivity {
         }
         }
         static final int REQUEST_IMAGE_CAPTURE = 11;
-
         private String  pictureImagePath = "";
-
         private void pickImage() {
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
             String imageFileName = timeStamp + ".jpg";
@@ -373,7 +381,6 @@ public class EquipmentActivity extends AppCompatActivity {
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
             startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE);
         }
-
         @Override
         public void onActivityResult(int requestCode, int resultCode, Intent intent) {
             super.onActivityResult(requestCode, resultCode, intent);
@@ -404,7 +411,6 @@ public class EquipmentActivity extends AppCompatActivity {
             }
 
         }
-
         private void showTypes(JSONArray jsonArray) {
             List<Type> list = new ArrayList<>();
             try {
@@ -427,7 +433,6 @@ public class EquipmentActivity extends AppCompatActivity {
                 }
             }
         }
-
         private class Type {
             private String Description;
             private int Id;
@@ -449,7 +454,6 @@ public class EquipmentActivity extends AppCompatActivity {
                 return Description;
             }
         }
-
         private class QueryTypesTask extends AsyncTask<String, String, String> {
             HttpURLConnection urlConnection;
 
