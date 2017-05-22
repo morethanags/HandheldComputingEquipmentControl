@@ -95,7 +95,7 @@ public class CustomAdapter extends BaseAdapter {
                         byteArray.length);
                 holder.photo.setImageBitmap(bitmap);
             } else {
-                holder.photo.setImageResource(R.mipmap.ic_photo_default);
+                holder.photo.setImageResource(R.drawable.im_nophotoavailable);
             }
 
             holder.button.setOnClickListener(new View.OnClickListener() {

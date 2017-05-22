@@ -99,7 +99,7 @@
             android:layout_weight=".75"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
-            android:src="@mipmap/ic_photo_default"
+            android:src="@drawable/im_nophotoavailable"
             />
         <Button
             android:id="@+id/ib_picture"

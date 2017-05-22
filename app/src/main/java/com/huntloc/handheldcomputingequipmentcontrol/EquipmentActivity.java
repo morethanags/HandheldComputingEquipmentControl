@@ -11,12 +11,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -241,7 +241,7 @@ public class EquipmentActivity extends AppCompatActivity {
                             byteArray.length);
                     photo.setImageBitmap(bitmap);
                 } else {
-                    photo.setImageResource(R.mipmap.ic_photo_default);
+                    photo.setImageResource(R.drawable.im_nophotoavailable);
                 }
             }
             return  view;
@@ -318,7 +318,7 @@ public class EquipmentActivity extends AppCompatActivity {
                             byteArray.length);
                     photo.setImageBitmap(bitmap);
                 } else {
-                    photo.setImageResource(R.mipmap.ic_photo_default);
+                    photo.setImageResource(R.drawable.im_nophotoavailable);
                 }
 
             }
@@ -342,29 +342,35 @@ public class EquipmentActivity extends AppCompatActivity {
         }
         private void save(){
 
-        try {
-            equipment.put("Brand",brand.getText());
-            equipment.put("SerialNumber",serial.getText());
-            equipment.put("Observation", observations.getText());
-            JSONObject type = new JSONObject();
-            Type selected = (Type) spinner.getSelectedItem();
-            type.accumulate("Id", selected.getId());
-            type.accumulate("Description", selected.getDescription());
-            equipment.put("Type", type);
-        }catch (JSONException je){
+            if(TextUtils.isEmpty(brand.getText().toString().trim())){
+                brand.setError("Enter equipment brand.");
+                return;
+            }
+            if(TextUtils.isEmpty(serial.getText().toString().trim())){
+                serial.setError("Enter equipment serial number.");
+                return;
+            }
+            try {
+                equipment.put("Brand", brand.getText());
+                equipment.put("SerialNumber", serial.getText());
+                equipment.put("Observation", observations.getText());
+                JSONObject type = new JSONObject();
+                Type selected = (Type) spinner.getSelectedItem();
+                type.accumulate("Id", selected.getId());
+                type.accumulate("Description", selected.getDescription());
+                equipment.put("Type", type);
+            } catch (JSONException je) {
 
-        }
-        if(!this.equipment.isNull("GUID")){
-            String serverURL = getResources().getString(R.string.service_url)
-                    + "/ComputingEquipmentService/Update/"+equipment.optString("GUID");
-            new SaveEquipmentTask().execute(serverURL);
-        }
-        else
-        {
-            String serverURL = getResources().getString(R.string.service_url)
-                    + "/ComputingEquipmentService/Create";
-            new SaveEquipmentTask().execute(serverURL);
-        }
+            }
+            if (!this.equipment.isNull("GUID")) {
+                String serverURL = getResources().getString(R.string.service_url)
+                        + "/ComputingEquipmentService/Update/" + equipment.optString("GUID");
+                new SaveEquipmentTask().execute(serverURL);
+            } else {
+                String serverURL = getResources().getString(R.string.service_url)
+                        + "/ComputingEquipmentService/Create";
+                new SaveEquipmentTask().execute(serverURL);
+            }
         }
         static final int REQUEST_IMAGE_CAPTURE = 11;
         private String  pictureImagePath = "";
