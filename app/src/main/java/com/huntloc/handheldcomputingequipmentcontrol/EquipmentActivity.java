@@ -40,9 +40,11 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -92,7 +94,6 @@ public class EquipmentActivity extends AppCompatActivity {
         }
         catch(JSONException je){}
     }
-
     public void deleteEquipment(JSONObject equipment){
 
         if(!equipment.isNull("GUID")){
@@ -137,6 +138,7 @@ public class EquipmentActivity extends AppCompatActivity {
        equipmentDialog.show(manager, "equipmentDialog");
     }
     public void showPopupWindow(JSONObject equipment) {
+        Log.d("showPopupWindow", equipment.toString());
         FragmentManager manager = getFragmentManager();
         EditEquipmentDialogFragment equipmentDialog = new EditEquipmentDialogFragment();
         equipmentDialog.setEquipment(equipment);
@@ -320,8 +322,8 @@ public class EquipmentActivity extends AppCompatActivity {
                 } else {
                     photo.setImageResource(R.drawable.im_nophotoavailable);
                 }
-
             }
+
             return view;
         }
         public void onClick(View view) {
@@ -351,20 +353,20 @@ public class EquipmentActivity extends AppCompatActivity {
                 return;
             }
             try {
-                equipment.put("Brand", brand.getText());
-                equipment.put("SerialNumber", serial.getText());
-                equipment.put("Observation", observations.getText());
+                this.equipment.put("Brand", brand.getText());
+                this.equipment.put("SerialNumber", serial.getText());
+                this.equipment.put("Observation", observations.getText());
                 JSONObject type = new JSONObject();
                 Type selected = (Type) spinner.getSelectedItem();
                 type.accumulate("Id", selected.getId());
                 type.accumulate("Description", selected.getDescription());
-                equipment.put("Type", type);
+                this.equipment.put("Type", type);
             } catch (JSONException je) {
 
             }
             if (!this.equipment.isNull("GUID")) {
                 String serverURL = getResources().getString(R.string.service_url)
-                        + "/ComputingEquipmentService/Update/" + equipment.optString("GUID");
+                        + "/ComputingEquipmentService/Update/" + this.equipment.optString("GUID");
                 new SaveEquipmentTask().execute(serverURL);
             } else {
                 String serverURL = getResources().getString(R.string.service_url)
@@ -408,7 +410,7 @@ public class EquipmentActivity extends AppCompatActivity {
                         byte[] byteArray = byteArrayOutputStream .toByteArray();
                         String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
                         Log.d("Encoded",encoded);
-                        equipment.put("Photo", encoded);
+                        this.equipment.put("Photo", encoded);
                     }
 
                 }catch(Exception e){
@@ -505,12 +507,12 @@ public class EquipmentActivity extends AppCompatActivity {
                 StringBuilder result = new StringBuilder();
                 try {
                     URL url = new URL(args[0]);
-                    Log.d("URL",url.toString());
+                    //Log.d("URL",url.toString());
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setRequestMethod("POST");
                     urlConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
 
-                    Log.d("ComputingEquipment", equipment.toString());
+                    //Log.d("ComputingEquipment", equipment.toString());
                     OutputStream os = urlConnection.getOutputStream();
                     os.write(equipment.toString().getBytes("UTF-8"));
                     os.close();
@@ -524,11 +526,11 @@ public class EquipmentActivity extends AppCompatActivity {
                     while ((line = reader.readLine()) != null) {
                         result.append(line);
                     }
-                } catch (Exception e) {
-                    Log.d("Exception", e.toString());
+                } catch (IOException e) {
+                    Log.d("Exception1", e.toString());
                 } finally {
                     urlConnection.disconnect();
-                }
+               }
                 return result.toString();
             }
             protected void onPostExecute(String result) {
