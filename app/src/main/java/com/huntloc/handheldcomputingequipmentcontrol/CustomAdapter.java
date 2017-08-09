@@ -75,12 +75,12 @@ public class CustomAdapter extends BaseAdapter {
         final ImageButton popUp_btn = holder.button;
 
         try {
-            typebrand = jsonArray.getJSONObject(position).getJSONObject("Type").optString("Description") + " " + jsonArray.getJSONObject(position).optString("Brand");
+            typebrand = jsonArray.getJSONObject(position).getJSONObject("ComputingEquipmentType").optString("Description") + " " + jsonArray.getJSONObject(position).optString("Brand");
             if (!jsonArray.getJSONObject(position).isNull("SerialNumber") && !jsonArray.getJSONObject(position).optString("SerialNumber").equals("null")) {
                 serial = jsonArray.getJSONObject(position).optString("SerialNumber");
             }
-            if (!jsonArray.getJSONObject(position).isNull("Observation") && !jsonArray.getJSONObject(position).optString("Observation").equals("null")) {
-                observation = jsonArray.getJSONObject(position).optString("Observation");
+            if (!jsonArray.getJSONObject(position).isNull("Comments") && !jsonArray.getJSONObject(position).optString("Comments").equals("null")) {
+                observation = jsonArray.getJSONObject(position).optString("Comments");
             }
             holder.typebrand.setText(typebrand);
             holder.serial.setText(serial);

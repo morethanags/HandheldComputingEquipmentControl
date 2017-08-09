@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -83,29 +82,28 @@ public class EquipmentActivity extends AppCompatActivity {
         }, 1000);*/
 
     }
-
     public void newEquipment(MenuItem item) {
         try
         {
             JSONObject newEquipment =  new JSONObject();
-            newEquipment.put("CredentialId",credential);
+            newEquipment.put("OwnerCredentialId",credential);
             newEquipment.put("OwnerDocumentId",documentId);
             showPopupWindow(newEquipment);
         }
         catch(JSONException je){}
     }
     public void deleteEquipment(JSONObject equipment){
-
-        if(!equipment.isNull("GUID")){
-            final String GUID =  equipment.optString("GUID");
+        if(!equipment.isNull("ComputingEquipmentId")){
+            final String ComputingEquipmentId =  equipment.optString("ComputingEquipmentId");
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which){
                         case DialogInterface.BUTTON_POSITIVE:
-                            Log.d("GUID",GUID);
+                            Log.d("ComputingEquipmentId",ComputingEquipmentId);
+
                             String serverURL = getResources().getString(R.string.service_url)
-                                    + "/ComputingEquipmentService/Delete/"+GUID;
+                                    + "/ComputingEquipmentService/Delete/"+ComputingEquipmentId;
                             new DeleteEquipmentTask().execute(serverURL);
                             break;
                         case DialogInterface.BUTTON_NEGATIVE:
@@ -125,7 +123,7 @@ public class EquipmentActivity extends AppCompatActivity {
     public void logEquipment(JSONObject equipment, int log){
         String serverURL = getResources().getString(R.string.service_url)
                 + "/ComputingEquipmentLogService/"
-                + equipment.optString("GUID")
+                + equipment.optString("ComputingEquipmentId")
                 + "/"
                 + log;
         new LogOperationTask().execute(serverURL);
@@ -233,7 +231,7 @@ public class EquipmentActivity extends AppCompatActivity {
             exitButton = (Button) view.findViewById(R.id.ib_exit);
             entranceButton.setOnClickListener(this);
             exitButton.setOnClickListener(this);
-            if(this.equipment!=null && !this.equipment.isNull("GUID")){
+            if(this.equipment!=null && !this.equipment.isNull("ComputingEquipmentId")){
                 if (!this.equipment.isNull("Photo") && !this.equipment.optString("Photo").equals("null")) {
                     byte[] byteArray;
                     Bitmap bitmap;
@@ -262,7 +260,7 @@ public class EquipmentActivity extends AppCompatActivity {
         Button saveButton, cancelButton, pickButton;
         Spinner spinner;
         JSONObject equipment;
-        EditText brand, serial, observations;
+        EditText brand, serial, comments;
         ImageView photo;
 
         EquipmentActivity activity;
@@ -286,7 +284,7 @@ public class EquipmentActivity extends AppCompatActivity {
 
             brand = (EditText) view.findViewById(R.id.editText_Brand);
             serial = (EditText) view.findViewById(R.id.editText_Serial);
-            observations = (EditText) view.findViewById(R.id.editText_Observations);
+            comments = (EditText) view.findViewById(R.id.editText_Observations);
             photo = (ImageView) view.findViewById(R.id.imageView_photo);
 
             saveButton = (Button) view.findViewById(R.id.ib_save);
@@ -302,14 +300,14 @@ public class EquipmentActivity extends AppCompatActivity {
             Log.d("URL types", serverURL);
             new QueryTypesTask().execute(serverURL);
 
-            if(this.equipment!=null && !this.equipment.isNull("GUID")){
+            if(this.equipment!=null && !this.equipment.isNull("ComputingEquipmentId")){
 
                 brand.setText(this.equipment.optString("Brand"));
                 if (!this.equipment.isNull("SerialNumber") && !this.equipment.optString("SerialNumber").equals("null")) {
                     serial.setText(this.equipment.optString("SerialNumber"));
                 }
-                if (!this.equipment.isNull("Observation") && !this.equipment.optString("Observation").equals("null")) {
-                    observations.setText(this.equipment.optString("Observation"));
+                if (!this.equipment.isNull("Comments") && !this.equipment.optString("Comments").equals("null")) {
+                    comments.setText(this.equipment.optString("Comments"));
                 }
                 if (!this.equipment.isNull("Photo") && !this.equipment.optString("Photo").equals("null")) {
                     byte[] byteArray;
@@ -355,18 +353,18 @@ public class EquipmentActivity extends AppCompatActivity {
             try {
                 this.equipment.put("Brand", brand.getText());
                 this.equipment.put("SerialNumber", serial.getText());
-                this.equipment.put("Observation", observations.getText());
+                this.equipment.put("Comments", comments.getText());
                 JSONObject type = new JSONObject();
                 Type selected = (Type) spinner.getSelectedItem();
-                type.accumulate("Id", selected.getId());
+                type.accumulate("ComputingEquipmentTypeId", selected.getComputingEquipmentTypeId());
                 type.accumulate("Description", selected.getDescription());
-                this.equipment.put("Type", type);
+                this.equipment.put("ComputingEquipmentType", type);
             } catch (JSONException je) {
 
             }
-            if (!this.equipment.isNull("GUID")) {
+            if (!this.equipment.isNull("ComputingEquipmentId")) {
                 String serverURL = getResources().getString(R.string.service_url)
-                        + "/ComputingEquipmentService/Update/" + this.equipment.optString("GUID");
+                        + "/ComputingEquipmentService/Update/" + this.equipment.optString("ComputingEquipmentId");
                 new SaveEquipmentTask().execute(serverURL);
             } else {
                 String serverURL = getResources().getString(R.string.service_url)
@@ -380,13 +378,16 @@ public class EquipmentActivity extends AppCompatActivity {
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
             String imageFileName = timeStamp + ".jpg";
 
-            pictureImagePath = Environment.getExternalStorageDirectory().toString()+"/ComputingEquipment/" + imageFileName;
+            pictureImagePath = Environment.getExternalStorageDirectory().toString()+"/Pictures/" + imageFileName;
+            Log.d("path",pictureImagePath);
 
             File file = new File(pictureImagePath);
             Uri outputFileUri = Uri.fromFile(file);
 
             Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
+
             startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE);
         }
         @Override
@@ -398,8 +399,7 @@ public class EquipmentActivity extends AppCompatActivity {
             }
             if (requestCode == REQUEST_IMAGE_CAPTURE ) {
                 try {
-                    Log.d("path",pictureImagePath);
-                    File imgFile = new  File(pictureImagePath);
+                    File imgFile = new File(pictureImagePath);
                     Log.d("exists",imgFile.exists()+"");
                     if(imgFile.exists()){
                         Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
@@ -417,24 +417,23 @@ public class EquipmentActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
-
         }
         private void showTypes(JSONArray jsonArray) {
             List<Type> list = new ArrayList<>();
             try {
                 for (int i = 0; i < jsonArray.length(); i++) {
-                    list.add(new Type(jsonArray.getJSONObject(i).getString("Description"), jsonArray.getJSONObject(i).getInt("Id")));
+                    list.add(new Type(jsonArray.getJSONObject(i).getString("Description"), jsonArray.getJSONObject(i).getInt("ComputingEquipmentTypeId")));
                 }
             } catch (Exception e) {
             }
-            ArrayAdapter<Type> adapter = new ArrayAdapter<Type>(getContext(),android.R.layout.simple_spinner_item, list );
+            ArrayAdapter<Type> adapter = new ArrayAdapter<Type>(getActivity().getApplicationContext(),android.R.layout.simple_spinner_item, list );
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner.setAdapter(adapter);
 
-            if(this.equipment!=null && !this.equipment.isNull("GUID")){
+            if(this.equipment!=null && !this.equipment.isNull("ComputingEquipmentId")){
                 for (int position = 0; position < adapter.getCount(); position++) {
                     try{
-                        if(((Type)adapter.getItem(position)).getId() ==  this.equipment.getJSONObject("Type").optInt("Id")) {
+                        if(((Type)adapter.getItem(position)).getComputingEquipmentTypeId() ==  this.equipment.getJSONObject("ComputingEquipmentType").optInt("ComputingEquipmentTypeId")) {
                             spinner.setSelection(position);
                         }}
                     catch (Exception e){}
@@ -443,20 +442,23 @@ public class EquipmentActivity extends AppCompatActivity {
         }
         private class Type {
             private String Description;
-            private int Id;
+
+            public int getComputingEquipmentTypeId() {
+                return ComputingEquipmentTypeId;
+            }
+
+            private int ComputingEquipmentTypeId;
 
             public Type(String description, int id) {
                 Description = description;
-                Id = id;
+                ComputingEquipmentTypeId = id;
             }
 
             public String getDescription() {
                 return Description;
             }
 
-            public int getId() {
-                return Id;
-            }
+
 
             public String toString() {
                 return Description;
