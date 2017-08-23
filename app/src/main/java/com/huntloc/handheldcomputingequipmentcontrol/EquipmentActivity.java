@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 
 import android.support.v7.app.AlertDialog;
@@ -54,6 +55,7 @@ import java.util.List;
 public class EquipmentActivity extends AppCompatActivity {
     ListView equipmentListView = null;
     private String documentId = null, credential = "";
+    private Button buttonFinish;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +82,14 @@ public class EquipmentActivity extends AppCompatActivity {
                 listEquipments();
             }
         }, 1000);*/
+        buttonFinish = (Button) view.findViewById(R.id.button_finish);
+        buttonFinish.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NavUtils.navigateUpFromSameTask(EquipmentActivity.this);
+
+            }
+        });
 
     }
     public void newEquipment(MenuItem item) {

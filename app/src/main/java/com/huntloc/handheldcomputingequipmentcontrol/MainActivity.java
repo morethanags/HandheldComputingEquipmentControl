@@ -9,38 +9,34 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Parcelable;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
+
 import android.widget.Toast;
 
-import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.UUID;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements
+        HandheldFragment.OnHandheldFragmentInteractionListener, VisitorsFragment.OnVisitorsFragmentInteractionListener {
     private static long back_pressed;
     private NfcAdapter mNfcAdapter;
-    private EditText mCredentialId;
     public static final String PERSONNEL_MESSAGE = "com.huntloc.handheldcomputingequipmentcontrol.PERSONNEL";
-    private Button buttonCheck;
+
+    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private ViewPager mViewPager;
     final int REQUEST_WRITE_EXTERNAL_STORAGE = 10;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,75 +61,43 @@ public class MainActivity extends AppCompatActivity {
                     .show();
         }
 
-        View view = findViewById(android.R.id.content);
-        mCredentialId = (EditText) view
-                .findViewById(R.id.editText_CredentialId);
-        mCredentialId.setOnKeyListener(new View.OnKeyListener() {
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if ((event.getAction() == KeyEvent.ACTION_DOWN)
-                        && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    if (mCredentialId.getText().toString().isEmpty()) {
-                        Toast.makeText(MainActivity.this,
-                                "Tap a Badge or Enter Credential ID",
-                                Toast.LENGTH_LONG).show();
-                    } else {
-                        sendRequest();
-                    }
-                    return true;
-                }
-                return false;
-            }
-        });
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the activity.
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        buttonCheck = (Button) view.findViewById(R.id.button_Register);
-        buttonCheck.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mCredentialId.getText().toString().isEmpty()) {
-                    Toast.makeText(MainActivity.this,
-                            "Tap a Badge or Enter Credential ID",
-                            Toast.LENGTH_LONG).show();
-                } else {
-                    sendRequest();
-                    hideKeyboard();
-                }
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.setOffscreenPageLimit(1);
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(mViewPager);
 
-            }
-        });
         handleIntent(getIntent());
     }
 
 
-    private void setCredentialId(String id) {
-        mCredentialId.setText(id);
-        if (!id.isEmpty()) {
-            String serverURL = getResources().getString(
-                    R.string.ccure_service_url)
-                    + "/SwapBadge/"
-                    + id
-                    + "/"
-                    + UUID.randomUUID().toString();
-            new QueryBadgeTask().execute(serverURL);
-            Log.d("URL Badge", serverURL);
-        }
-    }
     @Override
     public boolean onNavigateUpFromChild(Activity child) {
         setCredentialId("");
         return super.onNavigateUpFromChild(child);
+    }
+    private void setCredentialId(String id) {
+        ((HandheldFragment) mSectionsPagerAdapter.getItem(0))
+                .setCredentialId(id);
     }
     @Override
     protected void onResume() {
         super.onResume();
         setupForegroundDispatch(this, mNfcAdapter);
     }
-
     @Override
     protected void onPause() {
         stopForegroundDispatch(this, mNfcAdapter);
         super.onPause();
     }
-   public void setupForegroundDispatch(final Activity activity, NfcAdapter adapter) {
+    public void setupForegroundDispatch(final Activity activity, NfcAdapter adapter) {
         final Intent intent = new Intent(activity.getApplicationContext(),
                 activity.getClass());
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -227,170 +191,56 @@ public class MainActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT).show();
         back_pressed = System.currentTimeMillis();
     }
-    protected void displayEquipment(String result) {
-        Intent intent = new Intent(this, EquipmentActivity.class);
-        intent.putExtra(PERSONNEL_MESSAGE, result);
-        //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-        startActivity(intent);
-    }
-    private void hideKeyboard() {
-        View view = this.getCurrentFocus();
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
+
+    @Override
+    public void onVisitorsFragmentInteraction(Uri uri) {
+
     }
 
-    private void sendRequest() {
-        String serverURL = getResources().getString(R.string.service_url)
-                + "/PersonnelService/Retrieve/" + mCredentialId.getText().toString();
-        Log.d("URL personnel", serverURL);
-        new QueryPersonnelTask().execute(serverURL);
+    @Override
+    public void onHandheldFragmentInteraction(Uri uri) {
+
     }
-    private class QueryBadgeTask extends AsyncTask<String, String, String> {
-        String printedCode = "";
-        HttpURLConnection urlConnection;
 
-
-        @SuppressWarnings("unchecked")
-        protected String doInBackground(String... args) {
-            StringBuilder result = new StringBuilder();
-            try {
-                URL url = new URL(args[0]);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                }
-            } catch (Exception e) {
-                MainActivity.this
-                        .runOnUiThread(new Runnable() {
-                            public void run() {
-                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                                alertDialogBuilder.setTitle("Computing Equipment Control");
-                                alertDialogBuilder.setMessage("Red WiFi no Disponible");
-                                alertDialogBuilder.setCancelable(false);
-                                alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                    }
-                                });
-                                alertDialogBuilder.create().show();
-                            }
-                        });
-            } finally {
-                urlConnection.disconnect();
-            }
-            return result.toString();
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+        private HandheldFragment handheldFragment;
+        private VisitorsFragment visitorsFragment;
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
         }
 
-        protected void onPostExecute(String result) {
-            try {
-                Log.d("Result",result);
-                if (!result.equals("")) {
-                    JSONObject jsonResponse = new JSONObject(result);
-                    if (jsonResponse.isNull("PrintedCode")) {
-                        MainActivity.this
-                                .runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                                        alertDialogBuilder.setTitle("Computing Equipment Control");
-                                        alertDialogBuilder.setMessage("Credencial no Válida");
-                                        alertDialogBuilder.setCancelable(false);
-                                        alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                dialog.cancel();
-                                            }
-                                        });
-                                        alertDialogBuilder.create().show();
-                                    }
-                                });
-                        return;
-                    } else {
-                        printedCode = jsonResponse.optString("PrintedCode");
-                        MainActivity.this
-                                .runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        MainActivity.this.mCredentialId.setText(printedCode);
-                                        Log.d("Printed Code",printedCode);
-                                        sendRequest();
-                                    }
-                                });
-                    }
+        @Override
+        public Fragment getItem(int position) {
+            Fragment fragment = null;
+            if (position == 0) {
+                if (handheldFragment == null) {
+                    handheldFragment = new HandheldFragment();
                 }
-            } catch (Exception ex) {
-
+                fragment = handheldFragment;
             }
+            else if(position==1){
+                if (visitorsFragment == null) {
+                    visitorsFragment = new VisitorsFragment();
+                }
+                fragment = visitorsFragment;
+            }
+            return fragment;
         }
-    }
-    private class QueryPersonnelTask extends AsyncTask<String, String, String> {
-        HttpURLConnection urlConnection;
-        @SuppressWarnings("unchecked")
-        protected String doInBackground(String... args) {
-            StringBuilder result = new StringBuilder();
-            try {
-                URL url = new URL(args[0]);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                }
-            } catch (Exception e) {
-                Log.d("Exception",e.getMessage());
-                MainActivity.this.runOnUiThread(new Runnable() {
-                    public void run() {
-                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                        alertDialogBuilder.setTitle("Computing Equipment Control");
-                        alertDialogBuilder.setMessage("Red WiFi no Disponible");
-                        alertDialogBuilder.setCancelable(false);
-                        alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-                        alertDialogBuilder.create().show();
-                    }
-                });
-            } finally {
-                urlConnection.disconnect();
-            }
-            return result.toString();
-        }
-        protected void onPostExecute(String result) {
-            Log.d("Result", result);
-            try {
-                if (result!=null && !result.equals("")) {
-                    JSONObject jsonResponse = new JSONObject(result);
-                    if (jsonResponse.isNull("Credential")) {
-                        MainActivity.this
-                                .runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                                        alertDialogBuilder.setTitle("Computing Equipment Control");
-                                        alertDialogBuilder.setMessage("Credencial no Válida");
-                                        alertDialogBuilder.setCancelable(false);
-                                        alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                dialog.cancel();
-                                            }
-                                        });
-                                        alertDialogBuilder.create().show();
-                                    }
-                                });
-                        return;
-                    }
-                    else{
-                        MainActivity.this.displayEquipment(result);
-                    }
-                }
-            } catch (Exception ex) {
 
+        @Override
+        public int getCount() {
+            // Show 3 total pages.
+            return 2;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return "Contractors";
+                case 1: return  "Visitors";
             }
+            return null;
         }
     }
 }

@@ -1,9 +1,17 @@
 <resources>
-    <string name="app_name">Computing Equipment Control</string>
+    <string name="app_name">Electronic Equipment Control</string>
     <string name="credential_id">Badge Id:</string>
     <string name="credential_hint">Tap a badge or enter Id</string>
     <string name="button_Check_text">Check</string>
+    <string name="button_Finish_text">Finish</string>
+    <string name="visitor_id">Document Id:</string>
+    <string name="button_CheckVisitor_text">Check Visitor</string>
 
-    <string name="door_id">Computing Equipment Control</string>
+
+    <string name="contractors_door_id">Contractors Electronic Equipment Control</string>
+    <string name="visitors_door_id">Visitors Electronic Equipment Control</string>
     <string name="title_activity_main2">Main2Activity</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
