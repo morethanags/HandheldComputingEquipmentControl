@@ -119,10 +119,10 @@ public class CustomAdapter extends BaseAdapter {
                             } else if (i == R.id.action_edit) {
                                 ((EquipmentActivity)context).showPopupWindow(equipment);
                                 return true;
-                            } else if (i == R.id.action_delete) {
+                            } /*else if (i == R.id.action_delete) {
                                 ((EquipmentActivity)context).deleteEquipment(equipment);
                                 return true;
-                            } else {
+                            }*/ else {
                                 return onMenuItemClick(item);
                             }
                         }
