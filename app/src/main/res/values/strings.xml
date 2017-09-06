@@ -6,12 +6,7 @@
     <string name="button_Finish_text">Finish</string>
     <string name="visitor_id">Document Id:</string>
     <string name="button_CheckVisitor_text">Check Visitor</string>
-
-
-    <string name="contractors_door_id">Contractors Electronic Equipment Control</string>
-    <string name="visitors_door_id">Visitors Electronic Equipment Control</string>
-    <string name="title_activity_main2">Main2Activity</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-</resources>
+    <string name="contractors_door_id">Electronic Equipment Control</string>
+    <string name="visitors_door_id0">Visitors</string>
+    <string name="visitors_door_id1">Electronic Equipment Control</string>
+   </resources>
