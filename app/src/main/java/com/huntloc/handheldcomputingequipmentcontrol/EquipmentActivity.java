@@ -56,6 +56,8 @@ public class EquipmentActivity extends AppCompatActivity {
     ListView equipmentListView = null;
     private String documentId = null, credential = "";
     private Button buttonFinish;
+    private FragmentManager manager = getFragmentManager();
+    private EditEquipmentDialogFragment equipmentDialog = new EditEquipmentDialogFragment();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +71,8 @@ public class EquipmentActivity extends AppCompatActivity {
             personnelName = jsonResponse.optString("PersonnelName");
             credential = jsonResponse.optString("Credential");
             documentId = jsonResponse.optString("DocumentId");
-        } catch (Exception e) {
+        } catch (JSONException e) {
+
         }
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(personnelName);
@@ -86,34 +89,36 @@ public class EquipmentActivity extends AppCompatActivity {
         buttonFinish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d("buttonFinish", "buttonFinish");
                 NavUtils.navigateUpFromSameTask(EquipmentActivity.this);
 
             }
         });
 
     }
+
     public void newEquipment(MenuItem item) {
-        try
-        {
-            JSONObject newEquipment =  new JSONObject();
-            newEquipment.put("OwnerCredentialId",credential);
-            newEquipment.put("OwnerDocumentId",documentId);
+        try {
+            JSONObject newEquipment = new JSONObject();
+            newEquipment.put("OwnerCredentialId", credential);
+            newEquipment.put("OwnerDocumentId", documentId);
             showPopupWindow(newEquipment);
+        } catch (JSONException je) {
         }
-        catch(JSONException je){}
     }
-    public void deleteEquipment(JSONObject equipment){
-        if(!equipment.isNull("ComputingEquipmentId")){
-            final String ComputingEquipmentId =  equipment.optString("ComputingEquipmentId");
+
+    public void deleteEquipment(JSONObject equipment) {
+        if (!equipment.isNull("ComputingEquipmentId")) {
+            final String ComputingEquipmentId = equipment.optString("ComputingEquipmentId");
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    switch (which){
+                    switch (which) {
                         case DialogInterface.BUTTON_POSITIVE:
-                            Log.d("ComputingEquipmentId",ComputingEquipmentId);
+                            Log.d("ComputingEquipmentId", ComputingEquipmentId);
 
                             String serverURL = getResources().getString(R.string.service_url)
-                                    + "/ComputingEquipmentService/Delete/"+ComputingEquipmentId;
+                                    + "/ComputingEquipmentService/Delete/" + ComputingEquipmentId;
                             new DeleteEquipmentTask().execute(serverURL);
                             break;
                         case DialogInterface.BUTTON_NEGATIVE:
@@ -130,7 +135,8 @@ public class EquipmentActivity extends AppCompatActivity {
             builder.show();
         }
     }
-    public void logEquipment(JSONObject equipment, int log){
+
+    public void logEquipment(JSONObject equipment, int log) {
         String serverURL = getResources().getString(R.string.service_url)
                 + "/ComputingEquipmentLogService/"
                 + equipment.optString("ComputingEquipmentId")
@@ -138,33 +144,38 @@ public class EquipmentActivity extends AppCompatActivity {
                 + log;
         new LogOperationTask().execute(serverURL);
     }
+
     public void showLogPopupWindow(JSONObject equipment) {
-       FragmentManager manager = getFragmentManager();
-       LogEquipmentDialogFragment equipmentDialog = new LogEquipmentDialogFragment();
-       equipmentDialog.setEquipment(equipment);
-       equipmentDialog.setActivity(this);
-       equipmentDialog.show(manager, "equipmentDialog");
-    }
-    public void showPopupWindow(JSONObject equipment) {
-        Log.d("showPopupWindow", equipment.toString());
         FragmentManager manager = getFragmentManager();
-        EditEquipmentDialogFragment equipmentDialog = new EditEquipmentDialogFragment();
+        LogEquipmentDialogFragment equipmentDialog = new LogEquipmentDialogFragment();
         equipmentDialog.setEquipment(equipment);
         equipmentDialog.setActivity(this);
         equipmentDialog.show(manager, "equipmentDialog");
     }
+
+    public void showPopupWindow(JSONObject equipment) {
+        Log.d("showPopupWindow", equipment.toString());
+
+        equipmentDialog.setEquipment(equipment);
+        equipmentDialog.setActivity(this);
+        equipmentDialog.show(manager, "equipmentDialog");
+    }
+
     public void requestEquipment(MenuItem item) {
         requestEquipment();
     }
+
     private void requestEquipment() {
         String serverURL = getResources().getString(R.string.service_url)
                 + "/ComputingEquipmentService/Retrieve/" + documentId + "/_";
         Log.d("URL personnel", serverURL);
         new QueryEquipmentTask().execute(serverURL);
     }
+
     private void showEquipment(JSONArray jsonArray) {
         equipmentListView.setAdapter(new CustomAdapter(this, jsonArray));
     }
+
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.equipment_main_menu, menu);
@@ -173,6 +184,16 @@ public class EquipmentActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
+        Log.d("onActivityResult", "EquipmentActivity");
+
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
     private class QueryEquipmentTask extends AsyncTask<String, String, String> {
         HttpURLConnection urlConnection;
@@ -221,16 +242,20 @@ public class EquipmentActivity extends AppCompatActivity {
         JSONObject equipment;
         ImageView photo;
         EquipmentActivity activity;
+
         public void setEquipment(JSONObject equipment) {
             this.equipment = equipment;
         }
+
         public void setActivity(EquipmentActivity activity) {
             this.activity = activity;
         }
+
         @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
         }
+
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             setCancelable(true);
@@ -241,7 +266,7 @@ public class EquipmentActivity extends AppCompatActivity {
             exitButton = (Button) view.findViewById(R.id.ib_exit);
             entranceButton.setOnClickListener(this);
             exitButton.setOnClickListener(this);
-            if(this.equipment!=null && !this.equipment.isNull("ComputingEquipmentId")){
+            if (this.equipment != null && !this.equipment.isNull("ComputingEquipmentId")) {
                 if (!this.equipment.isNull("Photo") && !this.equipment.optString("Photo").equals("null")) {
                     byte[] byteArray;
                     Bitmap bitmap;
@@ -254,8 +279,9 @@ public class EquipmentActivity extends AppCompatActivity {
                     photo.setImageResource(R.drawable.im_nophotoavailable);
                 }
             }
-            return  view;
+            return view;
         }
+
         public void onClick(View view) {
             int i = view.getId();
             if (i == R.id.ib_entrance) {
@@ -272,7 +298,6 @@ public class EquipmentActivity extends AppCompatActivity {
         JSONObject equipment;
         EditText brand, serial, comments;
         ImageView photo;
-
         EquipmentActivity activity;
         public void setEquipment(JSONObject equipment) {
             this.equipment = equipment;
@@ -287,7 +312,7 @@ public class EquipmentActivity extends AppCompatActivity {
             super.onAttach(activity);
         }
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                Bundle savedInstanceState) {
+                                 Bundle savedInstanceState) {
             setCancelable(false);
             getDialog().setTitle("Computing Equipment");
             View view = inflater.inflate(R.layout.equipment_popup_window, null, false);
@@ -310,7 +335,7 @@ public class EquipmentActivity extends AppCompatActivity {
             Log.d("URL types", serverURL);
             new QueryTypesTask().execute(serverURL);
 
-            if(this.equipment!=null && !this.equipment.isNull("ComputingEquipmentId")){
+            if (this.equipment != null && !this.equipment.isNull("ComputingEquipmentId")) {
 
                 brand.setText(this.equipment.optString("Brand"));
                 if (!this.equipment.isNull("SerialNumber") && !this.equipment.optString("SerialNumber").equals("null")) {
@@ -350,13 +375,13 @@ public class EquipmentActivity extends AppCompatActivity {
                     break;
             }
         }
-        private void save(){
+        private void save() {
 
-            if(TextUtils.isEmpty(brand.getText().toString().trim())){
+            if (TextUtils.isEmpty(brand.getText().toString().trim())) {
                 brand.setError("Enter equipment brand.");
                 return;
             }
-            if(TextUtils.isEmpty(serial.getText().toString().trim())){
+            if (TextUtils.isEmpty(serial.getText().toString().trim())) {
                 serial.setError("Enter equipment serial number.");
                 return;
             }
@@ -383,48 +408,44 @@ public class EquipmentActivity extends AppCompatActivity {
             }
         }
         static final int REQUEST_IMAGE_CAPTURE = 11;
-        private String  pictureImagePath = "";
+        private String pictureImagePath = "";
         private void pickImage() {
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
             String imageFileName = timeStamp + ".jpg";
-
-            pictureImagePath = Environment.getExternalStorageDirectory().toString()+"/Pictures/" + imageFileName;
-            Log.d("path",pictureImagePath);
-
+            pictureImagePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()+"/"+imageFileName;
+            //pictureImagePath = Environment.getExternalStorageDirectory().toString()+"/Pictures";
+            Log.d("path", pictureImagePath);
             File file = new File(pictureImagePath);
             Uri outputFileUri = Uri.fromFile(file);
-
             Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
-
             startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE);
         }
         @Override
         public void onActivityResult(int requestCode, int resultCode, Intent intent) {
             super.onActivityResult(requestCode, resultCode, intent);
-            Log.d("result code",resultCode+"");
-            if(resultCode==0){
+            Log.d("resultCode", resultCode + "");
+            if (resultCode == 0) {
                 return;
             }
-            if (requestCode == REQUEST_IMAGE_CAPTURE ) {
+            if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 try {
                     File imgFile = new File(pictureImagePath);
-                    Log.d("exists",imgFile.exists()+"");
-                    if(imgFile.exists()){
+                    Log.d("exists", imgFile.exists() + "");
+                    if (imgFile.exists()) {
                         Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                        Bitmap resized = Bitmap.createScaledBitmap(bitmap,(int)(bitmap.getWidth()*0.5), (int)(bitmap.getHeight()*0.5), true);
+                        Bitmap resized = Bitmap.createScaledBitmap(bitmap, (int) (bitmap.getWidth() * 0.5), (int) (bitmap.getHeight() * 0.5), true);
                         photo.setImageBitmap(resized);
                         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                         resized.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
-                        byte[] byteArray = byteArrayOutputStream .toByteArray();
+                        byte[] byteArray = byteArrayOutputStream.toByteArray();
                         String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
-                        Log.d("Encoded",encoded);
+                        Log.d("Encoded", encoded);
                         this.equipment.put("Photo", encoded);
                     }
 
-                }catch(Exception e){
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    Log.d("Exception", e.toString());
                 }
             }
         }
@@ -436,17 +457,18 @@ public class EquipmentActivity extends AppCompatActivity {
                 }
             } catch (Exception e) {
             }
-            ArrayAdapter<Type> adapter = new ArrayAdapter<Type>(getActivity().getApplicationContext(),android.R.layout.simple_spinner_item, list );
+            ArrayAdapter<Type> adapter = new ArrayAdapter<Type>(getActivity().getApplicationContext(), android.R.layout.simple_spinner_item, list);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner.setAdapter(adapter);
 
-            if(this.equipment!=null && !this.equipment.isNull("ComputingEquipmentId")){
+            if (this.equipment != null && !this.equipment.isNull("ComputingEquipmentId")) {
                 for (int position = 0; position < adapter.getCount(); position++) {
-                    try{
-                        if(((Type)adapter.getItem(position)).getComputingEquipmentTypeId() ==  this.equipment.getJSONObject("ComputingEquipmentType").optInt("ComputingEquipmentTypeId")) {
+                    try {
+                        if (((Type) adapter.getItem(position)).getComputingEquipmentTypeId() == this.equipment.getJSONObject("ComputingEquipmentType").optInt("ComputingEquipmentTypeId")) {
                             spinner.setSelection(position);
-                        }}
-                    catch (Exception e){}
+                        }
+                    } catch (Exception e) {
+                    }
                 }
             }
         }
@@ -467,7 +489,6 @@ public class EquipmentActivity extends AppCompatActivity {
             public String getDescription() {
                 return Description;
             }
-
 
 
             public String toString() {
@@ -512,8 +533,9 @@ public class EquipmentActivity extends AppCompatActivity {
                 }
             }
         }
-        private class SaveEquipmentTask extends AsyncTask<String, String, String>{
+        private class SaveEquipmentTask extends AsyncTask<String, String, String> {
             HttpURLConnection urlConnection;
+
             @SuppressWarnings("unchecked")
             protected String doInBackground(String... args) {
                 StringBuilder result = new StringBuilder();
@@ -542,9 +564,10 @@ public class EquipmentActivity extends AppCompatActivity {
                     Log.d("Exception1", e.toString());
                 } finally {
                     urlConnection.disconnect();
-               }
+                }
                 return result.toString();
             }
+
             protected void onPostExecute(String result) {
                 try {
                     if (result != null && !result.equals("")) {
@@ -601,6 +624,7 @@ public class EquipmentActivity extends AppCompatActivity {
     }
     private class LogOperationTask extends AsyncTask<String, String, String> {
         HttpURLConnection urlConnection;
+
         @SuppressWarnings("unchecked")
         protected String doInBackground(String... args) {
             StringBuilder result = new StringBuilder();

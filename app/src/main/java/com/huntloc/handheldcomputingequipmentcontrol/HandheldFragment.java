@@ -121,7 +121,7 @@ public class HandheldFragment extends Fragment {
     private void displayEquipment(String result) {
         Intent intent = new Intent(getActivity(), EquipmentActivity.class);
         intent.putExtra(MainActivity.PERSONNEL_MESSAGE, result);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
         mCredentialId.setText("");
     }

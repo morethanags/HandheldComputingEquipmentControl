@@ -132,7 +132,7 @@ public class VisitorsFragment extends Fragment {
     public void displayEquipment(String result) {
         Intent intent = new Intent(getActivity(), EquipmentActivity.class);
         intent.putExtra(MainActivity.PERSONNEL_MESSAGE, result);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
         mCredentialId.setText("");
     }
@@ -246,6 +246,7 @@ public class VisitorsFragment extends Fragment {
                                  Bundle savedInstanceState) {
             setCancelable(false);
             getDialog().setTitle("New Visitor");
+
             View view = inflater.inflate(R.layout.visitor_popup_window, null, false);
 
             name = (EditText) view.findViewById(R.id.editText_Name);

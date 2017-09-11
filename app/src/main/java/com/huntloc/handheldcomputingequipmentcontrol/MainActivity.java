@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity implements
     private static long back_pressed;
     private NfcAdapter mNfcAdapter;
     public static final String PERSONNEL_MESSAGE = "com.huntloc.handheldcomputingequipmentcontrol.PERSONNEL";
-
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
     final int REQUEST_WRITE_EXTERNAL_STORAGE = 10;
@@ -76,10 +75,9 @@ public class MainActivity extends AppCompatActivity implements
 
         handleIntent(getIntent());
     }
-
-
     @Override
     public boolean onNavigateUpFromChild(Activity child) {
+        Log.d("onNavigateUpFromChild","MainActivity");
         setCredentialId("");
         return super.onNavigateUpFromChild(child);
     }
@@ -122,16 +120,13 @@ public class MainActivity extends AppCompatActivity implements
 
         adapter.enableForegroundDispatch(activity, pendingIntent, filters,  techList);
     }
-
     public void stopForegroundDispatch(final Activity activity, NfcAdapter adapter) {
         adapter.disableForegroundDispatch(activity);
     }
-
     @Override
     protected void onNewIntent(Intent intent) {
         handleIntent(intent);
     }
-
     private void handleIntent(Intent intent) {
         String action = intent.getAction();
         Log.d("action", action);
@@ -191,12 +186,9 @@ public class MainActivity extends AppCompatActivity implements
                     Toast.LENGTH_SHORT).show();
         back_pressed = System.currentTimeMillis();
     }
-
     @Override
     public void onVisitorsFragmentInteraction(Uri uri) {
-
     }
-
     @Override
     public void onHandheldFragmentInteraction(Uri uri) {
 
@@ -243,4 +235,11 @@ public class MainActivity extends AppCompatActivity implements
             return null;
         }
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        Log.d("onActivityResult", "MainActivity");
+
+    }
+
 }
