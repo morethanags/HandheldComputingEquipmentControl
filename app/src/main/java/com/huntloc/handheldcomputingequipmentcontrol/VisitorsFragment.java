@@ -108,11 +108,8 @@ public class VisitorsFragment extends Fragment {
 
             }
         });
-
-
         return view;
     }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -123,7 +120,6 @@ public class VisitorsFragment extends Fragment {
                     + " must implement OnFragmentInteractionListener");
         }
     }
-
     @Override
     public void onDetach() {
         super.onDetach();

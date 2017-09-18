@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -43,7 +44,6 @@ public class HandheldFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_handheld, container, false);
-        Log.d("onCreateView", "hera");
         mCredentialId = (EditText) view
                 .findViewById(R.id.editText_CredentialId);
         mCredentialId.setOnKeyListener(new View.OnKeyListener() {
@@ -139,6 +139,7 @@ public class HandheldFragment extends Fragment {
                 URL url = new URL(args[0]);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
+
                 InputStream in = new BufferedInputStream(urlConnection.getInputStream());
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                 String line;
@@ -146,7 +147,7 @@ public class HandheldFragment extends Fragment {
                     result.append(line);
                 }
             } catch (Exception e) {
-                Log.d("Exception",e.getMessage());
+                Log.d("Exception",e.toString());
                 handheldFragmentWeakReference.get().getActivity().runOnUiThread(new Runnable() {
                     public void run() {
                         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(handheldFragmentWeakReference.get().getActivity());
