@@ -30,7 +30,7 @@ import android.widget.Toast;
 
 
 public class MainActivity extends AppCompatActivity implements
-        HandheldFragment.OnHandheldFragmentInteractionListener, VisitorsFragment.OnVisitorsFragmentInteractionListener {
+        HandheldFragment.OnHandheldFragmentInteractionListener, VisitorsFragment.OnVisitorsFragmentInteractionListener, LogFragment.OnLogFragmentInteractionListener {
     private static long back_pressed;
     private NfcAdapter mNfcAdapter;
     public static final String PERSONNEL_MESSAGE = "com.huntloc.handheldcomputingequipmentcontrol.PERSONNEL";
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        mViewPager.setOffscreenPageLimit(1);
+        mViewPager.setOffscreenPageLimit(2);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
@@ -193,10 +193,14 @@ public class MainActivity extends AppCompatActivity implements
     public void onHandheldFragmentInteraction(Uri uri) {
 
     }
+    @Override
+    public void onLogFragmentInteraction(Uri uri) {
 
+    }
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
         private HandheldFragment handheldFragment;
         private VisitorsFragment visitorsFragment;
+        private LogFragment logFragment;
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
@@ -216,13 +220,19 @@ public class MainActivity extends AppCompatActivity implements
                 }
                 fragment = visitorsFragment;
             }
+            else if(position==2){
+                if (logFragment == null) {
+                    logFragment = new LogFragment();
+                }
+                fragment = logFragment;
+            }
             return fragment;
         }
 
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 2;
+            return 3;
         }
 
         @Override
@@ -231,6 +241,7 @@ public class MainActivity extends AppCompatActivity implements
                 case 0:
                     return "Contractors";
                 case 1: return  "Visitors";
+                case 2: return  "Entrance & Exit";
             }
             return null;
         }

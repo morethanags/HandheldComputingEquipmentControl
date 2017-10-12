@@ -290,11 +290,11 @@ public class VisitorsFragment extends Fragment {
             }
             try {
                 this.visitor = new JSONObject();
-                this.visitor.put("Name", name.getText());
-                this.visitor.put("LastName", lastName.getText());
+                this.visitor.put("Name", name.getText().toString().toUpperCase());
+                this.visitor.put("LastName", lastName.getText().toString().toUpperCase());
                 DocumentType selected = (DocumentType) documentType.getSelectedItem();
                 this.visitor.put("DocumentTypeId", selected.getDocumentTypeId());
-                this.visitor.put("DocumentId", documentId.getText());
+                this.visitor.put("DocumentId", documentId.getText().toString().toUpperCase());
             } catch (JSONException je) {
 
             }

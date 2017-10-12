@@ -181,20 +181,24 @@ public class EquipmentActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.equipment_main_menu, menu);
         return true;
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         Log.d("onActivityResult", "EquipmentActivity");
 
     }
+
     @Override
     protected void onPause() {
         super.onPause();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
     }
+
     private class QueryEquipmentTask extends AsyncTask<String, String, String> {
         HttpURLConnection urlConnection;
 
@@ -237,6 +241,7 @@ public class EquipmentActivity extends AppCompatActivity {
             }
         }
     }
+
     public static class LogEquipmentDialogFragment extends DialogFragment implements View.OnClickListener {
         Button entranceButton, exitButton;
         JSONObject equipment;
@@ -292,6 +297,7 @@ public class EquipmentActivity extends AppCompatActivity {
             dismiss();
         }
     }
+
     public static class EditEquipmentDialogFragment extends DialogFragment implements View.OnClickListener {
         Button saveButton, cancelButton, pickButton;
         Spinner spinner;
@@ -299,18 +305,23 @@ public class EquipmentActivity extends AppCompatActivity {
         EditText brand, serial, comments;
         ImageView photo;
         EquipmentActivity activity;
+
         public void setEquipment(JSONObject equipment) {
             this.equipment = equipment;
         }
+
         public void setActivity(EquipmentActivity activity) {
             this.activity = activity;
         }
+
         public EditEquipmentDialogFragment() {
         }
+
         @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
         }
+
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             setCancelable(false);
@@ -334,31 +345,36 @@ public class EquipmentActivity extends AppCompatActivity {
                     + "/ComputingEquipmentService/Retrieve/Types";
             Log.d("URL types", serverURL);
             new QueryTypesTask().execute(serverURL);
+            if (this.equipment != null) {
+                if (!this.equipment.isNull("ComputingEquipmentId")) {
 
-            if (this.equipment != null && !this.equipment.isNull("ComputingEquipmentId")) {
-
-                brand.setText(this.equipment.optString("Brand"));
-                if (!this.equipment.isNull("SerialNumber") && !this.equipment.optString("SerialNumber").equals("null")) {
-                    serial.setText(this.equipment.optString("SerialNumber"));
-                }
-                if (!this.equipment.isNull("Comments") && !this.equipment.optString("Comments").equals("null")) {
-                    comments.setText(this.equipment.optString("Comments"));
-                }
-                if (!this.equipment.isNull("Photo") && !this.equipment.optString("Photo").equals("null")) {
-                    byte[] byteArray;
-                    Bitmap bitmap;
-                    byteArray = Base64
-                            .decode(this.equipment.optString("Photo"), 0);
-                    bitmap = BitmapFactory.decodeByteArray(byteArray, 0,
-                            byteArray.length);
-                    photo.setImageBitmap(bitmap);
+                    brand.setText(this.equipment.optString("Brand"));
+                    if (!this.equipment.isNull("SerialNumber") && !this.equipment.optString("SerialNumber").equals("null")) {
+                        serial.setText(this.equipment.optString("SerialNumber"));
+                    }
+                    if (!this.equipment.isNull("Comments") && !this.equipment.optString("Comments").equals("null")) {
+                        comments.setText(this.equipment.optString("Comments"));
+                    }
+                    if (!this.equipment.isNull("Photo") && !this.equipment.optString("Photo").equals("null")) {
+                        byte[] byteArray;
+                        Bitmap bitmap;
+                        byteArray = Base64
+                                .decode(this.equipment.optString("Photo"), 0);
+                        bitmap = BitmapFactory.decodeByteArray(byteArray, 0,
+                                byteArray.length);
+                        photo.setImageBitmap(bitmap);
+                    } else {
+                        photo.setImageResource(R.drawable.im_nophotoavailable);
+                    }
                 } else {
-                    photo.setImageResource(R.drawable.im_nophotoavailable);
+                    brand.setText("");
+                    serial.setText("");
+                    comments.setText("");
                 }
             }
-
             return view;
         }
+
         public void onClick(View view) {
             switch (view.getId()) {
                 case R.id.ib_save:
@@ -375,6 +391,7 @@ public class EquipmentActivity extends AppCompatActivity {
                     break;
             }
         }
+
         private void save() {
 
             if (TextUtils.isEmpty(brand.getText().toString().trim())) {
@@ -386,9 +403,9 @@ public class EquipmentActivity extends AppCompatActivity {
                 return;
             }
             try {
-                this.equipment.put("Brand", brand.getText());
-                this.equipment.put("SerialNumber", serial.getText());
-                this.equipment.put("Comments", comments.getText());
+                this.equipment.put("Brand", brand.getText().toString().toUpperCase());
+                this.equipment.put("SerialNumber", serial.getText().toString().toUpperCase());
+                this.equipment.put("Comments", comments.getText().toString().toUpperCase());
                 JSONObject type = new JSONObject();
                 Type selected = (Type) spinner.getSelectedItem();
                 type.accumulate("ComputingEquipmentTypeId", selected.getComputingEquipmentTypeId());
@@ -407,12 +424,14 @@ public class EquipmentActivity extends AppCompatActivity {
                 new SaveEquipmentTask().execute(serverURL);
             }
         }
+
         static final int REQUEST_IMAGE_CAPTURE = 11;
         private String pictureImagePath = "";
+
         private void pickImage() {
             String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
             String imageFileName = timeStamp + ".jpg";
-            pictureImagePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()+"/"+imageFileName;
+            pictureImagePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath() + "/" + imageFileName;
             //pictureImagePath = Environment.getExternalStorageDirectory().toString()+"/Pictures";
             Log.d("path", pictureImagePath);
             File file = new File(pictureImagePath);
@@ -421,6 +440,7 @@ public class EquipmentActivity extends AppCompatActivity {
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
             startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE);
         }
+
         @Override
         public void onActivityResult(int requestCode, int resultCode, Intent intent) {
             super.onActivityResult(requestCode, resultCode, intent);
@@ -449,6 +469,7 @@ public class EquipmentActivity extends AppCompatActivity {
                 }
             }
         }
+
         private void showTypes(JSONArray jsonArray) {
             List<Type> list = new ArrayList<>();
             try {
@@ -472,6 +493,7 @@ public class EquipmentActivity extends AppCompatActivity {
                 }
             }
         }
+
         private class Type {
             private String Description;
 
@@ -495,6 +517,7 @@ public class EquipmentActivity extends AppCompatActivity {
                 return Description;
             }
         }
+
         private class QueryTypesTask extends AsyncTask<String, String, String> {
             HttpURLConnection urlConnection;
 
@@ -533,6 +556,7 @@ public class EquipmentActivity extends AppCompatActivity {
                 }
             }
         }
+
         private class SaveEquipmentTask extends AsyncTask<String, String, String> {
             HttpURLConnection urlConnection;
 
@@ -584,6 +608,7 @@ public class EquipmentActivity extends AppCompatActivity {
             }
         }
     }
+
     private class DeleteEquipmentTask extends AsyncTask<String, String, String> {
         HttpURLConnection urlConnection;
 
@@ -622,6 +647,7 @@ public class EquipmentActivity extends AppCompatActivity {
             }
         }
     }
+
     private class LogOperationTask extends AsyncTask<String, String, String> {
         HttpURLConnection urlConnection;
 
