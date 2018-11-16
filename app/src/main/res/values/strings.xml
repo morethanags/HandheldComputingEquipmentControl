@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Electronic Equipment Control</string>
+    <string name="app_name">Electronic Equipment V2</string>
     <string name="credential_id">Badge Id:</string>
     <string name="credential_hint">Tap a badge or enter Id</string>
     <string name="button_Check_text">Check</string>

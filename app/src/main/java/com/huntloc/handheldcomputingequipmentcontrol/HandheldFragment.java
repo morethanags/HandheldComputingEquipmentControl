@@ -101,10 +101,8 @@ public class HandheldFragment extends Fragment {
         if (!id.isEmpty()) {
             String serverURL = getResources().getString(
                     R.string.ccure_service_url)
-                    + "/SwapBadge/"
-                    + id
-                    + "/"
-                    + UUID.randomUUID().toString();
+                    + "/Access/GetBadge/"
+                    + id;
             new HandheldFragment.QueryBadgeTask(this).execute(serverURL);
             Log.d("URL Badge", serverURL);
         }
@@ -244,7 +242,7 @@ public class HandheldFragment extends Fragment {
 
         protected void onPostExecute(String result) {
             try {
-                Log.d("Result",result);
+
                 if (!result.equals("")) {
                     JSONObject jsonResponse = new JSONObject(result);
                     if (jsonResponse.isNull("PrintedCode")) {
